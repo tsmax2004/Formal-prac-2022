@@ -1,7 +1,6 @@
 import enum
 from collections import deque
 
-
 alphabet = {chr(i) for i in range(ord('a'), ord('z') + 1)} | \
            {chr(i) for i in range(ord('A'), ord('Z') + 1)} | \
            {str(i) for i in range(0, 10)} | {''}
@@ -12,6 +11,7 @@ class DOAStatus(enum.Enum):
     WITHOUT_EPS = 1
     DETERMINISTIC = 2
     FULL_DETERMINISTIC = 3
+    MIN_FULL_DETERMINISTIC = 4
 
 
 class DOA:
@@ -138,11 +138,14 @@ class DOA:
         for node in self.nodes:
             if node not in new_nodes:
                 del self.adj_lists[node]
+            else:
+                for symbol in alphabet:
+                    self.adj_lists[node][symbol] &= new_nodes
         self.nodes = new_nodes
         self.acceptance &= self.nodes
 
     def make_deterministic(self):
-        if self.status == DOAStatus.DETERMINISTIC:
+        if self.status in (DOAStatus.DETERMINISTIC, DOAStatus.FULL_DETERMINISTIC, DOAStatus.MIN_FULL_DETERMINISTIC):
             return
 
         self.delete_eps()
@@ -192,15 +195,16 @@ class DOA:
                     self.active_alphabet.add(symbol)
 
     def make_full_deterministic(self):
-        if self.status == DOAStatus.FULL_DETERMINISTIC:
+        if self.status in (DOAStatus.FULL_DETERMINISTIC, DOAStatus.MIN_FULL_DETERMINISTIC):
             return
         self.make_deterministic()
         self.build_active_alphabet()
 
-        trash_node = self.get_unique_node()
-        self.add_node(trash_node)
+        trash_node = str(max(map(int, self.nodes)) + 1)   # if status == DETERMINISTIC,
+        self.add_node(trash_node)                         # then nodes is subset of {1, 2, ..., max}
         for node in self.nodes:
             for symbol in self.active_alphabet:
                 if not self.adj_lists[node][symbol]:
                     self.add_edge(node, trash_node, symbol)
+
         self.status = DOAStatus.FULL_DETERMINISTIC
