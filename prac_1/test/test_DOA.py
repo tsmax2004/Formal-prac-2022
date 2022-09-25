@@ -4,8 +4,8 @@ from prac_1.parser import read_doa
 
 
 class TestBasicDOA:
-    testing_doas = [('doa_testing_1.txt', ['a', 'aabaabaaabbb'], ['', 'aa', 'ac']),
-                    ('doa_testing_2.txt', ['da', 'abcdddddaacac'], ['daa', 'abda'])]
+    testing_doas = [('doa_testing_1.doa', ['a', 'aabaabaaabbb'], ['', 'aa', 'ac']),
+                    ('doa_testing_2.doa', ['da', 'abcdddddaacac'], ['daa', 'abda'])]
 
     def test_add_node(self):
         doa = DOA()
@@ -84,3 +84,10 @@ class TestBasicDOA:
         assert self.check_words_in_doa(doa, words)
         assert self.check_wrong_words_in_doa(doa, wrong_words)
 
+    def test_remove_useless(self):
+        file, words, wrong_words = self.testing_doas[1]
+        doa = read_doa(file)
+        doa.delete_eps()
+        old_cnt_nodes = len(doa.nodes)
+        doa.remove_useless_nodes()
+        assert old_cnt_nodes - len(doa.nodes) == 2

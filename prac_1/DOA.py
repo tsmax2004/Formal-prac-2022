@@ -13,6 +13,8 @@ class DOA:
         self.last_unique_node = None
         self.adj_lists_rev = None
         self.used = None
+        self.achievable_from_start = None
+        self.achieve_acceptance = None
 
     def get_unique_node(self):
         if not self.last_unique_node:
@@ -84,6 +86,39 @@ class DOA:
                     self.used = set()
                     self.pull_off_eps_dfs(out, to, symbol)
             if out in self.acceptance:
+                self.used = set()
                 self.pull_off_acceptance_dfs(out)
         for out in self.nodes:
             self.adj_lists[out][''].clear()
+
+    def build_achievable_from_start_dfs(self, node):
+        if node in self.achievable_from_start:
+            return
+        self.achievable_from_start.add(node)
+        for symbol in alphabet:
+            for to in self.adj_lists[node][symbol]:
+                self.build_achievable_from_start_dfs(to)
+
+    def build_achieve_acceptance(self, node):
+        if node in self.achieve_acceptance:
+            return
+        self.achieve_acceptance.add(node)
+        for symbol in alphabet:
+            for to in self.adj_lists_rev[node][symbol]:
+                self.build_achieve_acceptance(to)
+
+    def remove_useless_nodes(self):
+        self.achievable_from_start = set()
+        self.build_achievable_from_start_dfs(self.start)
+
+        self.build_adj_lists_rev()
+        self.achieve_acceptance = set()
+        for node in self.acceptance & self.achievable_from_start:
+            self.build_achieve_acceptance(node)
+
+        new_nodes = self.achievable_from_start & self.achieve_acceptance
+        for node in self.nodes:
+            if node not in new_nodes:
+                del self.adj_lists[node]
+        self.nodes = new_nodes
+        self.acceptance &= self.nodes
