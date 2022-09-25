@@ -11,6 +11,7 @@ class DOAStatus(enum.Enum):
     DEFAULT = 0
     WITHOUT_EPS = 1
     DETERMINISTIC = 2
+    FULL_DETERMINISTIC = 3
 
 
 class DOA:
@@ -26,6 +27,7 @@ class DOA:
         self.used = None
         self.achievable_from_start = None
         self.achieve_acceptance = None
+        self.active_alphabet = None
 
     def get_unique_node(self):
         if not self.last_unique_node:
@@ -181,3 +183,24 @@ class DOA:
                 self.adj_lists[numeration[new_node]][symbol] = {numeration[frozenset(to)]}
         self.remove_useless_nodes()
         self.status = DOAStatus.DETERMINISTIC
+
+    def build_active_alphabet(self):
+        self.active_alphabet = set()
+        for node in self.nodes:
+            for symbol in alphabet:
+                if self.adj_lists[node][symbol]:
+                    self.active_alphabet.add(symbol)
+
+    def make_full_deterministic(self):
+        if self.status == DOAStatus.FULL_DETERMINISTIC:
+            return
+        self.make_deterministic()
+        self.build_active_alphabet()
+
+        trash_node = self.get_unique_node()
+        self.add_node(trash_node)
+        for node in self.nodes:
+            for symbol in self.active_alphabet:
+                if not self.adj_lists[node][symbol]:
+                    self.add_edge(node, trash_node, symbol)
+        self.status = DOAStatus.FULL_DETERMINISTIC

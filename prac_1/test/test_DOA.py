@@ -105,6 +105,8 @@ class TestBasicDOA:
         draw_doa(doa, 'graphs/' + name + '_without_useless')
         doa.make_deterministic()
         draw_doa(doa, 'graphs/' + name + '_deterministic')
+        doa.make_full_deterministic()
+        draw_doa(doa, 'graphs/' + name + '_full_deterministic')
 
     def check_words_in_deterministic_doa(self, doa, words):
         for word in words:
@@ -121,3 +123,15 @@ class TestBasicDOA:
         doa.make_deterministic()
         assert self.check_words_in_deterministic_doa(doa, words)
         assert self.check_wrong_words_in_doa(doa, wrong_words)
+
+        doa.make_full_deterministic()
+        assert self.check_words_in_deterministic_doa(doa, words)
+        assert self.check_wrong_words_in_doa(doa, wrong_words)
+
+        for node in doa.nodes:
+            for symbol in doa.active_alphabet:
+                assert doa.adj_lists[node][symbol]
+
+        cnt_nodes = len(doa.nodes)
+        doa.make_full_deterministic()
+        assert len(doa.nodes) == cnt_nodes
