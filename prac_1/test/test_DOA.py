@@ -1,9 +1,12 @@
 import pytest
 from prac_1.DOA import DOA
 from prac_1.parser import read_doa
+from prac_1.drawer import draw_doa
 
 
 class TestBasicDOA:
+    testing_doas_names = [('doa_testing_1.doa', 'doa_testing_1'),
+                          ('doa_testing_2.doa', 'doa_testing_2')]
     testing_doas = [('doa_testing_1.doa', ['a', 'aabaabaaabbb'], ['', 'aa', 'ac']),
                     ('doa_testing_2.doa', ['da', 'abcdddddaacac'], ['daa', 'abda'])]
 
@@ -91,3 +94,12 @@ class TestBasicDOA:
         old_cnt_nodes = len(doa.nodes)
         doa.remove_useless_nodes()
         assert old_cnt_nodes - len(doa.nodes) == 2
+
+    @pytest.mark.parametrize('file, name', testing_doas_names)
+    def test_drawer(self, file, name):
+        doa = read_doa(file)
+        draw_doa(doa, 'graphs/' + name)
+        doa.delete_eps()
+        draw_doa(doa, 'graphs/' + name + '_without_eps')
+        doa.remove_useless_nodes()
+        draw_doa(doa, 'graphs/' + name + '_without_useless')
