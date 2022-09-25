@@ -1,8 +1,12 @@
 import pytest
 from prac_1.DOA import DOA
+from prac_1.parser import read_doa
 
 
 class TestBasicDOA:
+    testing_doas = [('doa_testing_1.txt', ['a', 'aabaabaaabbb'], ['', 'aa', 'ac']),
+                    ('doa_testing_2.txt', ['da', 'abcdddddaacac'], ['daa', 'abda'])]
+
     def test_add_node(self):
         doa = DOA()
 
@@ -50,3 +54,33 @@ class TestBasicDOA:
             doa.make_start('0')
         with pytest.raises(ValueError):
             doa.make_acceptance('f')
+
+    def check_words_in_doa(self, doa, words):
+        for word in words:
+            self.used = set()
+            if not self.find_word_dfs(doa, doa.start, word):
+                return False
+        return True
+
+    def check_wrong_words_in_doa(self, doa, words):
+        for word in words:
+            self.used = set()
+            if self.find_word_dfs(doa, doa.start, word):
+                return False
+        return True
+
+    @pytest.mark.parametrize('file, words, wrong_words', testing_doas)
+    def test_read_doa_from_file(self, file, words, wrong_words):
+        doa = read_doa(file)
+        assert self.check_words_in_doa(doa, words)
+        assert self.check_wrong_words_in_doa(doa, wrong_words)
+
+    @pytest.mark.parametrize('file, words, wrong_words', testing_doas)
+    def test_delete_eps(self, file, words, wrong_words):
+        doa = read_doa(file)
+        doa.delete_eps()
+        for out in doa.nodes:
+            assert doa.adj_lists[out][''] == set()
+        assert self.check_words_in_doa(doa, words)
+        assert self.check_wrong_words_in_doa(doa, wrong_words)
+

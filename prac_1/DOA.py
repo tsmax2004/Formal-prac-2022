@@ -11,6 +11,8 @@ class DOA:
         self.acceptance = set()
 
         self.last_unique_node = None
+        self.adj_lists_rev = None
+        self.used = None
 
     def get_unique_node(self):
         if not self.last_unique_node:
@@ -49,3 +51,39 @@ class DOA:
             self.add_edge(out, unique_node, word[0])
             self.add_edge(unique_node, to, word[1:])
 
+    def build_adj_lists_rev(self):
+        self.adj_lists_rev = {node: {symbol: set() for symbol in alphabet} for node in self.nodes}
+        for out in self.nodes:
+            for symbol in alphabet:
+                for to in self.adj_lists[out][symbol]:
+                    self.adj_lists_rev[to][symbol].add(out)
+
+    def pull_off_eps_dfs(self, node, to, symbol):
+        if node in self.used:
+            return
+        self.used.add(node)
+        self.adj_lists[node][symbol].add(to)
+        for out in self.adj_lists_rev[node]['']:
+            self.pull_off_eps_dfs(out, to, symbol)
+
+    def pull_off_acceptance_dfs(self, node):
+        if node in self.used:
+            return
+        self.used.add(node)
+        self.acceptance.add(node)
+        for out in self.adj_lists_rev[node]['']:
+            self.pull_off_acceptance_dfs(out)
+
+    def delete_eps(self):
+        self.build_adj_lists_rev()
+        for out in self.nodes:
+            for symbol in alphabet:
+                if symbol == '':
+                    continue
+                for to in self.adj_lists[out][symbol]:
+                    self.used = set()
+                    self.pull_off_eps_dfs(out, to, symbol)
+            if out in self.acceptance:
+                self.pull_off_acceptance_dfs(out)
+        for out in self.nodes:
+            self.adj_lists[out][''].clear()
