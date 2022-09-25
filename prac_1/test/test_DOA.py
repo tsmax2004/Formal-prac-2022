@@ -103,3 +103,21 @@ class TestBasicDOA:
         draw_doa(doa, 'graphs/' + name + '_without_eps')
         doa.remove_useless_nodes()
         draw_doa(doa, 'graphs/' + name + '_without_useless')
+        doa.make_deterministic()
+        draw_doa(doa, 'graphs/' + name + '_deterministic')
+
+    def check_words_in_deterministic_doa(self, doa, words):
+        for word in words:
+            node = doa.start
+            for symbol in word:
+                node = list(doa.adj_lists[node][symbol])[0]
+            if node not in doa.acceptance:
+                return False
+        return True
+
+    @pytest.mark.parametrize('file, words, wrong_words', testing_doas)
+    def test_make_deterministic(self, file, words, wrong_words):
+        doa = read_doa(file)
+        doa.make_deterministic()
+        assert self.check_words_in_deterministic_doa(doa, words)
+        assert self.check_wrong_words_in_doa(doa, wrong_words)

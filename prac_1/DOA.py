@@ -1,6 +1,16 @@
+import enum
+from collections import deque
+
+
 alphabet = {chr(i) for i in range(ord('a'), ord('z') + 1)} | \
            {chr(i) for i in range(ord('A'), ord('Z') + 1)} | \
            {str(i) for i in range(0, 10)} | {''}
+
+
+class DOAStatus(enum.Enum):
+    DEFAULT = 0
+    WITHOUT_EPS = 1
+    DETERMINISTIC = 2
 
 
 class DOA:
@@ -9,6 +19,7 @@ class DOA:
         self.adj_lists = dict()
         self.start = None
         self.acceptance = set()
+        self.status = DOAStatus.DEFAULT
 
         self.last_unique_node = None
         self.adj_lists_rev = None
@@ -28,6 +39,7 @@ class DOA:
             return
         self.nodes.add(node)
         self.adj_lists[node] = {symbol: set() for symbol in alphabet}
+        self.status = DOAStatus.DEFAULT
 
     def make_start(self, node):
         node = str(node)
@@ -52,6 +64,7 @@ class DOA:
             unique_node = self.get_unique_node()
             self.add_edge(out, unique_node, word[0])
             self.add_edge(unique_node, to, word[1:])
+        self.status = DOAStatus.DEFAULT
 
     def build_adj_lists_rev(self):
         self.adj_lists_rev = {node: {symbol: set() for symbol in alphabet} for node in self.nodes}
@@ -77,6 +90,8 @@ class DOA:
             self.pull_off_acceptance_dfs(out)
 
     def delete_eps(self):
+        if self.status == DOAStatus.WITHOUT_EPS:
+            return
         self.build_adj_lists_rev()
         for out in self.nodes:
             for symbol in alphabet:
@@ -90,6 +105,7 @@ class DOA:
                 self.pull_off_acceptance_dfs(out)
         for out in self.nodes:
             self.adj_lists[out][''].clear()
+        self.status = DOAStatus.WITHOUT_EPS
 
     def build_achievable_from_start_dfs(self, node):
         if node in self.achievable_from_start:
@@ -122,3 +138,46 @@ class DOA:
                 del self.adj_lists[node]
         self.nodes = new_nodes
         self.acceptance &= self.nodes
+
+    def make_deterministic(self):
+        if self.status == DOAStatus.DETERMINISTIC:
+            return
+
+        self.delete_eps()
+        self.remove_useless_nodes()
+
+        queue = deque(frozenset([node]) for node in self.nodes)
+        new_nodes = set()
+        new_adj_lists = dict()
+
+        while queue:
+            new_node = queue.popleft()
+            if new_node in new_nodes:
+                continue
+            new_nodes.add(new_node)
+            new_adj_lists[new_node] = {symbol: set() for symbol in alphabet}
+            for symbol in alphabet:
+                for node in new_node:
+                    new_adj_lists[new_node][symbol] |= self.adj_lists[node][symbol]
+            for symbol in alphabet:
+                if new_adj_lists[new_node][symbol]:
+                    queue.append(frozenset(new_adj_lists[new_node][symbol]))
+
+        numeration = dict()
+        i = 0
+        for new_node in new_nodes:
+            numeration[new_node] = str(i)
+            i += 1
+        self.nodes = set(str(j) for j in range(i))
+        self.start = numeration[frozenset([self.start])]
+        self.acceptance = {numeration[new_node] for new_node in new_nodes if new_node & self.acceptance}
+        self.adj_lists.clear()
+        for new_node in new_nodes:
+            self.adj_lists[numeration[new_node]] = {symbol: set() for symbol in alphabet}
+            for symbol in alphabet:
+                to = new_adj_lists[new_node][symbol]
+                if not to:
+                    continue
+                self.adj_lists[numeration[new_node]][symbol] = {numeration[frozenset(to)]}
+        self.remove_useless_nodes()
+        self.status = DOAStatus.DETERMINISTIC
