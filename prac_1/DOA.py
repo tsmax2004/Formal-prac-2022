@@ -1,9 +1,9 @@
 import enum
 from collections import deque
 
-alphabet = {chr(i) for i in range(ord('a'), ord('z') + 1)} | \
-           {chr(i) for i in range(ord('A'), ord('Z') + 1)} | \
-           {str(i) for i in range(0, 10)} | {''}
+alphabet = [chr(i) for i in range(ord('a'), ord('z') + 1)] + \
+           [chr(i) for i in range(ord('A'), ord('Z') + 1)] + \
+           [str(i) for i in range(0, 10)] + ['']
 
 
 class DOAStatus(enum.Enum):
@@ -67,6 +67,21 @@ class DOA:
             self.add_edge(out, unique_node, word[0])
             self.add_edge(unique_node, to, word[1:])
         self.status = DOAStatus.DEFAULT
+
+    def copy(self, other):
+        self.nodes = other.nodes
+        self.adj_lists = other.adj_lists
+        self.start = other.start
+        self.acceptance = other.acceptance
+        self.status = other.status
+
+        self.last_unique_node = other.last_unique_node
+        self.adj_lists_rev = other.adj_lists_rev
+        self.used = other.used
+        self.achievable_from_start = other.achievable_from_start
+        self.achieve_acceptance = other.achieve_acceptance
+        self.active_alphabet = other.active_alphabet
+
 
     def build_adj_lists_rev(self):
         self.adj_lists_rev = {node: {symbol: set() for symbol in alphabet} for node in self.nodes}
@@ -188,11 +203,11 @@ class DOA:
         self.status = DOAStatus.DETERMINISTIC
 
     def build_active_alphabet(self):
-        self.active_alphabet = set()
+        self.active_alphabet = []
         for node in self.nodes:
             for symbol in alphabet:
-                if self.adj_lists[node][symbol]:
-                    self.active_alphabet.add(symbol)
+                if self.adj_lists[node][symbol] and symbol not in self.active_alphabet:
+                    self.active_alphabet.append(symbol)
 
     def make_full_deterministic(self):
         if self.status in (DOAStatus.FULL_DETERMINISTIC, DOAStatus.MIN_FULL_DETERMINISTIC):
@@ -208,3 +223,53 @@ class DOA:
                     self.add_edge(node, trash_node, symbol)
 
         self.status = DOAStatus.FULL_DETERMINISTIC
+
+    def check_classes_are_same(self, temp_classes, classes):
+        temp_division_on_classes = [set() for i in range(len(self.nodes))]
+        division_on_classes = [set() for i in range(len(self.nodes))]
+        for node in self.nodes:
+            temp_division_on_classes[temp_classes[node]].add(node)
+            division_on_classes[classes[node]].add(node)
+        temp_division_on_classes = set(frozenset(i) for i in temp_division_on_classes)
+        division_on_classes = set(frozenset(i) for i in division_on_classes)
+        return temp_division_on_classes == division_on_classes
+
+    def make_min_full_deterministic(self):
+        if self.status == DOAStatus.MIN_FULL_DETERMINISTIC:
+            return
+        self.make_full_deterministic()
+
+        temp_classes = {node: int(node in self.acceptance) for node in self.nodes}
+        classes = dict()
+        tuple_numeration = dict()
+        last_tuple_num = 0
+        while True:
+            classes = dict()
+            tuple_numeration = dict()
+            last_tuple_num = 0
+            for node in self.nodes:
+                tup = [temp_classes[node]]
+                for symbol in self.active_alphabet:
+                    tup.append(temp_classes[list(self.adj_lists[node][symbol])[0]])
+                tup = tuple(tup)
+                if tup not in tuple_numeration:
+                    tuple_numeration[tup] = last_tuple_num
+                    last_tuple_num += 1
+                classes[node] = tuple_numeration[tup]
+            if self.check_classes_are_same(temp_classes, classes):
+                break
+            temp_classes = classes
+
+        classes = {node: str(classes[node]) for node in classes}
+        new_doa = DOA()
+        for i in range(last_tuple_num):
+            new_doa.add_node(str(i))
+        new_doa.make_start(classes[self.start])
+        for node in self.nodes:
+            if node in self.acceptance:
+                new_doa.make_acceptance(classes[node])
+            for symbol in self.active_alphabet:
+                to = list(self.adj_lists[node][symbol])[0]
+                new_doa.add_edge(classes[node], classes[to], symbol)
+        self.copy(new_doa)
+        self.status = DOAStatus.MIN_FULL_DETERMINISTIC

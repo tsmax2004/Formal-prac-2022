@@ -6,9 +6,11 @@ from prac_1.drawer import draw_doa
 
 class TestBasicDOA:
     testing_doas_names = [('doa_testing_1.doa', 'doa_testing_1'),
-                          ('doa_testing_2.doa', 'doa_testing_2')]
+                          ('doa_testing_2.doa', 'doa_testing_2'),
+                          ('doa_testing_3.doa', 'doa_testing_3')]
     testing_doas = [('doa_testing_1.doa', ['a', 'aabaabaaabbb'], ['', 'aa', 'ac']),
-                    ('doa_testing_2.doa', ['da', 'abcdddddaacac'], ['daa', 'abda'])]
+                    ('doa_testing_2.doa', ['da', 'abcdddddaacac'], ['daa', 'abda']),
+                    ('doa_testing_3.doa', [], [])]
 
     def test_add_node(self):
         doa = DOA()
@@ -107,6 +109,8 @@ class TestBasicDOA:
         draw_doa(doa, 'graphs/' + name + '_deterministic')
         doa.make_full_deterministic()
         draw_doa(doa, 'graphs/' + name + '_full_deterministic')
+        doa.make_min_full_deterministic()
+        draw_doa(doa, 'graphs/' + name + '_min_full_deterministic')
 
     def check_words_in_deterministic_doa(self, doa, words):
         for word in words:
@@ -118,7 +122,7 @@ class TestBasicDOA:
         return True
 
     @pytest.mark.parametrize('file, words, wrong_words', testing_doas)
-    def test_make_deterministic(self, file, words, wrong_words):
+    def test_make_full_deterministic(self, file, words, wrong_words):
         doa = read_doa(file)
         doa.make_deterministic()
         assert self.check_words_in_deterministic_doa(doa, words)
@@ -135,3 +139,8 @@ class TestBasicDOA:
         cnt_nodes = len(doa.nodes)
         doa.make_full_deterministic()
         assert len(doa.nodes) == cnt_nodes
+
+    @pytest.mark.parametrize('file, words, wrong_words', testing_doas)
+    def test_make_min_full_deterministic(self, file, words, wrong_words):
+        doa = read_doa(file)
+        doa.make_min_full_deterministic()
