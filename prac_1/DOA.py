@@ -240,9 +240,6 @@ class DOA:
         self.make_full_deterministic()
 
         temp_classes = {node: int(node in self.acceptance) for node in self.nodes}
-        classes = dict()
-        tuple_numeration = dict()
-        last_tuple_num = 0
         while True:
             classes = dict()
             tuple_numeration = dict()

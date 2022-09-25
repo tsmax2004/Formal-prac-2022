@@ -1,4 +1,4 @@
-from prac_1.DOA import DOA
+from prac_1.DOA import DOA, alphabet
 
 
 def read_doa(file):
@@ -24,3 +24,17 @@ def read_doa(file):
                 line = line.split()
                 doa.add_edge(current_state, line[2], '' if line[1] == "EPS" else line[1])
     return doa
+
+
+def write_doa(doa, file):
+    with open(file, 'w') as f:
+        f.write("DOA: v1\n")
+        f.write("Start: " + doa.start + '\n')
+        f.write("Acceptance: " + " & ".join(doa.acceptance) + '\n')
+        f.write("--BEGIN--\n")
+        for node in doa.nodes:
+            f.write("State: " + node + '\n')
+            for symbol in alphabet:
+                for to in doa.adj_lists[node][symbol]:
+                    f.write(" -> " + symbol + ' ' + to + '\n')
+        f.write("--END--")

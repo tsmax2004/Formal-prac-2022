@@ -1,6 +1,6 @@
 import pytest
 from prac_1.DOA import DOA
-from prac_1.parser import read_doa
+from prac_1.parser import read_doa, write_doa
 from prac_1.drawer import draw_doa
 
 
@@ -111,6 +111,8 @@ class TestBasicDOA:
         draw_doa(doa, 'graphs/' + name + '_full_deterministic')
         doa.make_min_full_deterministic()
         draw_doa(doa, 'graphs/' + name + '_min_full_deterministic')
+        write_doa(doa, name + '_min_full_deterministic.doa')
+
 
     def check_words_in_deterministic_doa(self, doa, words):
         for word in words:
@@ -144,3 +146,5 @@ class TestBasicDOA:
     def test_make_min_full_deterministic(self, file, words, wrong_words):
         doa = read_doa(file)
         doa.make_min_full_deterministic()
+
+
