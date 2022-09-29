@@ -140,16 +140,8 @@ class DOA:
             for to in self.adj_lists_rev[node][symbol]:
                 self.build_achieve_acceptance(to)
 
-    def remove_useless_nodes(self):
-        self.achievable_from_start = set()
-        self.build_achievable_from_start_dfs(self.start)
-
-        self.build_adj_lists_rev()
-        self.achieve_acceptance = set()
-        for node in self.acceptance & self.achievable_from_start:
-            self.build_achieve_acceptance(node)
-
-        new_nodes = self.achievable_from_start & self.achieve_acceptance
+    def conjunction_nodes_with(self, set_nodes):
+        new_nodes = set_nodes
         for node in self.nodes:
             if node not in new_nodes:
                 del self.adj_lists[node]
@@ -158,6 +150,22 @@ class DOA:
                     self.adj_lists[node][symbol] &= new_nodes
         self.nodes = new_nodes
         self.acceptance &= self.nodes
+
+    def remove_not_achievable_from_start(self):
+        self.achievable_from_start = set()
+        self.build_achievable_from_start_dfs(self.start)
+        self.conjunction_nodes_with(self.achievable_from_start)
+
+    def remove_not_achieve_acceptance(self):
+        self.build_adj_lists_rev()
+        self.achieve_acceptance = set()
+        for node in self.acceptance:
+            self.build_achieve_acceptance(node)
+        self.conjunction_nodes_with(self.achieve_acceptance)
+
+    def remove_useless_nodes(self):
+        self.remove_not_achievable_from_start()
+        self.remove_not_achieve_acceptance()
 
     def make_deterministic(self):
         if self.status in (DOAStatus.DETERMINISTIC, DOAStatus.FULL_DETERMINISTIC, DOAStatus.MIN_FULL_DETERMINISTIC):
@@ -269,4 +277,5 @@ class DOA:
                 to = list(self.adj_lists[node][symbol])[0]
                 new_doa.add_edge(classes[node], classes[to], symbol)
         self.copy(new_doa)
+        self.remove_not_achievable_from_start()
         self.status = DOAStatus.MIN_FULL_DETERMINISTIC

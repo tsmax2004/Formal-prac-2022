@@ -7,10 +7,14 @@ from prac_1.drawer import draw_doa
 class TestBasicDOA:
     testing_doas_names = [('doa_testing_1.doa', 'doa_testing_1'),
                           ('doa_testing_2.doa', 'doa_testing_2'),
-                          ('doa_testing_3.doa', 'doa_testing_3')]
+                          ('doa_testing_3.doa', 'doa_testing_3'),
+                          ('doa_testing_4.doa', 'doa_testing_4'),
+                          ('doa_testing_5.doa', 'doa_testing_5')]
     testing_doas = [('doa_testing_1.doa', ['a', 'aabaabaaabbb'], ['', 'aa', 'ac']),
                     ('doa_testing_2.doa', ['da', 'abcdddddaacac'], ['daa', 'abda']),
-                    ('doa_testing_3.doa', [], [])]
+                    ('doa_testing_3.doa', [], []),
+                    ('doa_testing_4.doa', ['aababbbababbaaaab', 'babb'], ['baab', '']),
+                    ('doa_testing_5.doa', ['', 'bbabbabaabababbbba'], ['baab', 'aabababa'])]
 
     def test_add_node(self):
         doa = DOA()
@@ -111,8 +115,6 @@ class TestBasicDOA:
         draw_doa(doa, 'graphs/' + name + '_full_deterministic')
         doa.make_min_full_deterministic()
         draw_doa(doa, 'graphs/' + name + '_min_full_deterministic')
-        write_doa(doa, name + '_min_full_deterministic.doa')
-
 
     def check_words_in_deterministic_doa(self, doa, words):
         for word in words:
@@ -147,4 +149,10 @@ class TestBasicDOA:
         doa = read_doa(file)
         doa.make_min_full_deterministic()
 
+        assert self.check_words_in_deterministic_doa(doa, words)
+        assert self.check_wrong_words_in_doa(doa, wrong_words)
 
+        doa.build_active_alphabet()
+        for node in doa.nodes:
+            for symbol in doa.active_alphabet:
+                assert doa.adj_lists[node][symbol]
