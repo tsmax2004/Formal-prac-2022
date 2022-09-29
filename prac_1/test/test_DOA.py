@@ -15,6 +15,9 @@ class TestBasicDOA:
                     ('doa_testing_3.doa', [], []),
                     ('doa_testing_4.doa', ['aababbbababbaaaab', 'babb'], ['baab', '']),
                     ('doa_testing_5.doa', ['', 'bbabbabaabababbbba'], ['baab', 'aabababa'])]
+    testing_doas_for_iso = [('doa_testing_5.doa', 'min_doa_testing_5.doa'),
+                            ('doa_testing_4.doa', 'min_doa_testing_4.doa'),
+                            ('doa_testing_1.doa', 'min_doa_testing_1.doa')]
 
     def test_add_node(self):
         doa = DOA()
@@ -155,4 +158,35 @@ class TestBasicDOA:
         doa.build_active_alphabet()
         for node in doa.nodes:
             for symbol in doa.active_alphabet:
-                assert doa.adj_lists[node][symbol]
+                assert len(doa.adj_lists[node][symbol]) == 1
+
+    @pytest.mark.parametrize('doa_file, right_doa_file', testing_doas_for_iso)
+    def test_isomorphism_of_mis_doas(self, doa_file, right_doa_file):
+        self.doa_iso_1 = read_doa(doa_file)
+        self.doa_iso_2 = read_doa(right_doa_file)
+
+        self.doa_iso_1.make_min_full_deterministic()
+
+        self.visited = {v: False for v in self.doa_iso_1.nodes}
+        self.associations = {v: None for v in self.doa_iso_1.nodes}
+        assert self.check_isomorphism_of_min_doas_dfs(self.doa_iso_1.start, self.doa_iso_2.start)
+
+    def check_isomorphism_of_min_doas_dfs(self, v1, v2):
+        self.visited[v1] = True
+
+        if (v1 in self.doa_iso_1.acceptance) != (v2 in self.doa_iso_2.acceptance):
+            return False
+        self.associations[v1] = v2
+        result = True
+        for symbol in self.doa_iso_1.adj_lists[v1]:
+            if len(self.doa_iso_1.adj_lists[v1][symbol]) == 0:
+                if len(self.doa_iso_2.adj_lists[v2][symbol]) != 0:
+                    return False
+                continue
+            to1 = list(self.doa_iso_1.adj_lists[v1][symbol])[0]
+            to2 = list(self.doa_iso_2.adj_lists[v2][symbol])[0]
+            if self.visited[to1]:
+                result = result and to2 == self.associations[to1]
+            else:
+                result &= self.check_isomorphism_of_min_doas_dfs(to1, to2)
+        return result
