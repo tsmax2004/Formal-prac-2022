@@ -82,7 +82,6 @@ class DOA:
         self.achieve_acceptance = other.achieve_acceptance
         self.active_alphabet = other.active_alphabet
 
-
     def build_adj_lists_rev(self):
         self.adj_lists_rev = {node: {symbol: set() for symbol in alphabet} for node in self.nodes}
         for out in self.nodes:
@@ -223,8 +222,8 @@ class DOA:
         self.make_deterministic()
         self.build_active_alphabet()
 
-        trash_node = str(max(map(int, self.nodes)) + 1)   # if status == DETERMINISTIC,
-        self.add_node(trash_node)                         # then nodes is subset of {1, 2, ..., max}
+        trash_node = str(max(map(int, self.nodes)) + 1)  # if status == DETERMINISTIC,
+        self.add_node(trash_node)  # then nodes is subset of {1, 2, ..., max}
         for node in self.nodes:
             for symbol in self.active_alphabet:
                 if not self.adj_lists[node][symbol]:

@@ -9,15 +9,16 @@ class TestBasicDOA:
                           ('doa_testing_2.doa', 'doa_testing_2'),
                           ('doa_testing_3.doa', 'doa_testing_3'),
                           ('doa_testing_4.doa', 'doa_testing_4'),
-                          ('doa_testing_5.doa', 'doa_testing_5')]
+                          ('doa_testing_5.doa', 'doa_testing_5'),
+                          ('doa_testing_6.doa', 'doa_testing_6')]
     testing_doas = [('doa_testing_1.doa', ['a', 'aabaabaaabbb'], ['', 'aa', 'ac']),
                     ('doa_testing_2.doa', ['da', 'abcdddddaacac'], ['daa', 'abda']),
-                    ('doa_testing_3.doa', [], []),
                     ('doa_testing_4.doa', ['aababbbababbaaaab', 'babb'], ['baab', '']),
                     ('doa_testing_5.doa', ['', 'bbabbabaabababbbba'], ['baab', 'aabababa'])]
     testing_doas_for_iso = [('doa_testing_5.doa', 'min_doa_testing_5.doa'),
                             ('doa_testing_4.doa', 'min_doa_testing_4.doa'),
-                            ('doa_testing_1.doa', 'min_doa_testing_1.doa')]
+                            ('doa_testing_1.doa', 'min_doa_testing_1.doa'),
+                            ('doa_testing_6.doa', 'min_doa_testing_6.doa')]
 
     def test_add_node(self):
         doa = DOA()
