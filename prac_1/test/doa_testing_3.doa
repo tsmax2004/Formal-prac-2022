@@ -1,0 +1,38 @@
+DOA: v1
+Start: 1
+Acceptance: 5 & 45 & 25 & 235 & 456 & 2456
+--BEGIN--
+State: 1
+ -> a 2
+ -> b x
+State: 2
+ -> a 3
+ -> b 45
+State: 3
+ -> a x
+ -> b 2
+State: 5
+ -> a 25
+ -> b 6
+State: 6
+ -> a 5
+ -> b x
+State: 45
+ -> a 25
+ -> b 6
+State: 25
+ -> a 235
+ -> b 456
+State: 235
+ -> a 235
+ -> b 2456
+State: 456
+ -> a 25
+ -> b 6
+State: 2456
+ -> a 235
+ -> b 456
+State: x
+ -> a x
+ -> b x
+--END--

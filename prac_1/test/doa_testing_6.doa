@@ -1,0 +1,27 @@
+DOA: v1
+Start: 0
+Acceptance: 7
+--BEGIN--
+State: 0
+ -> a 0
+ -> b 0
+ -> b 1
+ -> b 5
+State: 1
+ -> b 2
+State: 2
+ -> a 2
+ -> b 2
+ -> a 3
+State: 3
+ -> a 4
+State: 4
+ -> b 4
+ -> b 7
+State: 5
+ -> a 6
+State: 6
+ -> b 4
+State: 7
+ -> a 7
+--END--
