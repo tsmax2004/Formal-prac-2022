@@ -1,0 +1,5 @@
+EPS 1
+ab 1
+abc 1
+aab 0
+abca 0
