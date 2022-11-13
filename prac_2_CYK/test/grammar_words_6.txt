@@ -1,0 +1,4 @@
+acccccccccbcccbabaacca 1
+aacbaaa 1
+aababcccaa 0
+EPS 0
