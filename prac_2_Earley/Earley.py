@@ -66,6 +66,8 @@ class Earley:
             B = sit.after_dot[0]
             if not self.gr.is_non_term(B):
                 continue
+            if B not in self.gr.rules:
+                continue
             for right in self.gr.rules[B]:
                 if right[0] != 'EPS':
                     self.d[j].add(Situation(B, [], right, j))
