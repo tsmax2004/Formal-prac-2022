@@ -22,6 +22,8 @@ class Earley:
     def __init__(self, gr):
         self.gr = gr
         self.gr.add_new_start()
+        self.gr.remove_non_generative()
+        self.gr.remove_unreachable()
         self.d = []
         self.dot = '.'
 
@@ -84,6 +86,8 @@ class Earley:
                 if len(sit2.after_dot) == 0:
                     continue
                 B = sit2.after_dot[0]
+                if B != sit1.left:
+                    continue
                 if not self.gr.is_non_term(B):
                     continue
                 self.d[j].add(Situation(sit2.left, sit2.before_dot + [B], sit2.after_dot[1:], sit2.i))
