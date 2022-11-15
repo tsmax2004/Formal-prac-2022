@@ -1,6 +1,9 @@
 class Grammar:
     def __init__(self):
-        self.rules = dict()  # char -> set of tuples
+        """ Переходы хранятся в словаре rules в виде кортежей из символов правой части, start - стартовый,
+            cnt_sup - количество вспомогательных нетерминалов """
+
+        self.rules = dict()
         self.start = 'S'
         self.cnt_sup = 0
 
@@ -15,12 +18,14 @@ class Grammar:
             return True
         return sym.upper() == sym
 
-    def add_rule(self, left, right):  # left is char, right is tuple
+    def add_rule(self, left, right):
         if left not in self.rules:
             self.rules[left] = set()
         self.rules[left].add(right)
 
     def update_rules(self, new_non_terms):
+        """ Удаляет правила, содержащие нетерминалы не из new_non_terms """
+
         new_rules = dict()
         for non_term in self.rules.keys():
             if non_term not in new_non_terms:
@@ -115,7 +120,8 @@ class Grammar:
 
     def find_eps_generative(self):
         tmp_rules = {
-            non_term: list(set(right) for right in self.rules[non_term] if right != 'EPS' and self.is_non_term(right[0])) for
+            non_term: list(
+                set(right) for right in self.rules[non_term] if right != 'EPS' and self.is_non_term(right[0])) for
             non_term in self.rules.keys()}
 
         eps_generative = set(non_term for non_term in self.rules.keys() if tuple(['EPS']) in self.rules[non_term])

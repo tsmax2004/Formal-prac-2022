@@ -30,4 +30,3 @@ class CYK:
                             for k in range(i + 1, j):
                                 dp[non_term][i][j] |= dp[right[0]][i][k] and dp[right[1]][k][j]
         return dp[self.gr.start][0][n]
-
