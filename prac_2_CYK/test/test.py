@@ -21,7 +21,8 @@ class Test:
                  ('grammar_testing_4.txt', 'grammar_words_4.txt'),
                  ('grammar_testing_5.txt', 'grammar_words_5.txt'),
                  ('grammar_testing_6.txt', 'grammar_words_6.txt'),
-                 ('grammar_testing_7.txt', 'grammar_words_7.txt')]
+                 ('grammar_testing_7.txt', 'grammar_words_7.txt'),
+                 ('grammar_testing_8.txt', 'grammar_words_8.txt')]
 
     @pytest.mark.parametrize('gr_file', testing_grammars)
     def test_remove_non_generative(self, gr_file):
