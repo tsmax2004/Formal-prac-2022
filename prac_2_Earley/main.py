@@ -5,11 +5,12 @@ from prac_2_Earley.io_grammar import read_grammar
 if __name__ == '__main__':
     gr = read_grammar('input.txt')
     earley = Earley(gr)
-    print(earley.check_word(input()))
 
-
-# EPS 1
-# ab 1
-# abc 1
-# aab 0
-# abca 0
+    while True:
+        w = input("Input a word or 0 to exit: ")
+        if w == '0':
+            break
+        if earley.check_word(w):
+            print(w, " is in L(G)")
+        else:
+            print(w, " is not in L(G)")

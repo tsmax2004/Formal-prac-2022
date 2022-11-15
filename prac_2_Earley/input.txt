@@ -1,5 +1,3 @@
+S -> SS
+S -> aSb
 S -> EPS
-S -> aAbB
-A -> EPS
-B -> c
-B -> A
