@@ -9,7 +9,8 @@ class Test:
                  ('grammar_testing_3.txt', 'grammar_words_3.txt'),
                  ('grammar_testing_4.txt', 'grammar_words_4.txt'),
                  ('grammar_testing_5.txt', 'grammar_words_5.txt'),
-                 ('grammar_testing_6.txt', 'grammar_words_6.txt')]
+                 ('grammar_testing_6.txt', 'grammar_words_6.txt'),
+                 ('grammar_testing_7.txt', 'grammar_words_7.txt')]
 
     @pytest.mark.parametrize('gr_file, words_file', check_CYK)
     def test_Earley(self, gr_file, words_file):

@@ -1,0 +1,15 @@
+S -> ABC
+S -> ABB
+S -> BS
+S -> s
+A -> AAB
+B -> SSS
+A -> FORMALKITHEBEST
+B -> NEKITA
+A -> aBaBa
+C -> EPS
+C -> c
+S -> a
+C -> AABBBAC
+B -> AccaA
+A -> c
