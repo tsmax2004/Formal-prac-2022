@@ -46,5 +46,5 @@ S -> EPS
 
 ### How to run:
 1. Введите КС-грамматику в prac_2_Earley/input.txt в описанном выше формате (считается, что ввод корректный).
-2. prac_2_Earley/main.py из prac_2_Earley
+2. Запустите prac_2_Earley/main.py из prac_2_Earley
 3. Следуйте инструкциям в консоли
