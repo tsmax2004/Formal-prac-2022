@@ -3,6 +3,7 @@ from prac_2_Earley.Grammar import Grammar
 
 class LetterNode:
     def __init__(self, char):
+        """ Вершина связного списка """
         self.char = char
         self.left = None
         self.right = None
@@ -10,6 +11,8 @@ class LetterNode:
 
 class Situation:
     def __init__(self, left, before_dot, after_dot, i):
+        """ Ситуация хранит левую часть, как символ, слово перед точкой и слово после точки как головы (LetterNode)
+            соответствующих связанных списков, содержащих эти слова, и позицию. """
         self.left = left
         self.before_dot = before_dot
         self.after_dot = after_dot
@@ -37,11 +40,11 @@ class Situation:
 
 class Earley:
     def __init__(self, gr):
-        self.gr = gr
-        self.gr.add_new_start()
-        self.d = []
-        self.non_terms_to_predict = set()
-        self.w = None
+        self.gr = gr                # входная грамматика
+        self.gr.add_new_start()     # добавляем новое стартовое и переход S' -> S
+        self.d = []                 # множества D_i, хранятся в виде массива множеств ситуация с символом B после точки
+        self.non_terms_to_predict = set()       # нетерминалы, которые должен раскрыть predict
+        self.w = None                           # входное слово
 
     def check_word(self, w):
         self.w = w
@@ -66,6 +69,8 @@ class Earley:
         return sit in self.d[n]['$']
 
     def get_sit(self, left, before_dot, after_dot, i):
+        """ Строит ситуацию, представив слова в правой части в виде связных списков """
+
         ln = LetterNode('$')
         for c in after_dot[::-1]:
             tmp_ln = LetterNode(c)
@@ -83,6 +88,8 @@ class Earley:
         return Situation(left, ln_before_dot, ln_after_dot, i)
 
     def transform_sit(self, sit):
+        """ По ситуации (S -> a·Bc, i) возвращает (S -> aB·c, i)"""
+
         nl_after_dot = sit.after_dot.right
         nl_before_dot = LetterNode(sit.after_dot.char)
         nl_before_dot.left = sit.before_dot
