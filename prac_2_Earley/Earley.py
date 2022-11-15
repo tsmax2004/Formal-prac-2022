@@ -22,8 +22,6 @@ class Earley:
     def __init__(self, gr):
         self.gr = gr
         self.gr.add_new_start()
-        self.gr.remove_non_generative()
-        self.gr.remove_unreachable()
         self.d = []
         self.dot = '.'
 
