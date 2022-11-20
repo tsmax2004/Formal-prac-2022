@@ -192,7 +192,7 @@ class Grammar:
                 new_rules.pop(non_term)
         self.rules = new_rules
 
-    def make_Chomsky_form(self):
+    def make_сhomsky_form(self):
         self.remove_non_generative()
         self.remove_unreachable()
         self.remove_mixed()

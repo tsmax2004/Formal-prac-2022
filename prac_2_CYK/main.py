@@ -4,7 +4,7 @@ from prac_2_CYK.CYK import CYK
 
 if __name__ == "__main__":
     gr = read_grammar('input.txt')
-    gr.make_Chomsky_form()
+    gr.make_сhomsky_form()
     cyk = CYK(gr)
 
     while True:

@@ -119,15 +119,15 @@ class Test:
                     assert False
 
     @pytest.mark.parametrize('gr_file, out', writing_Chomsky_form)
-    def test_Chomsky_form(self, gr_file, out):
+    def test_сhomsky_form(self, gr_file, out):
         gr = read_grammar(gr_file)
-        gr.make_Chomsky_form()
+        gr.make_сhomsky_form()
         write_grammar(gr, out)
 
     @pytest.mark.parametrize('gr_file, words_file', check_CYK)
     def test_CYK(self, gr_file, words_file):
         gr = read_grammar(gr_file)
-        gr.make_Chomsky_form()
+        gr.make_сhomsky_form()
         cyk = CYK(gr)
         with open(words_file) as f:
             for line in f:
