@@ -39,34 +39,34 @@ class Situation:
 
 
 class Earley:
-    def __init__(self, gr):
-        self.gr = gr                # входная грамматика
-        self.gr.add_new_start()     # добавляем новое стартовое и переход S' -> S
-        self.d = []                 # множества D_i, хранятся в виде массива множеств ситуация с символом B после точки
-        self.non_terms_to_predict = set()       # нетерминалы, которые должен раскрыть predict
-        self.w = None                           # входное слово
+    def __init__(self, grammar):
+        self.grammar = grammar  # входная грамматика
+        self.grammar.add_new_start()  # добавляем новое стартовое и переход S' -> S
+        self.sets_of_situations = []  # множества D_i, хранятся в виде массива множеств ситуация с символом B после точки
+        self.non_terms_to_predict = set()  # нетерминалы, которые должен раскрыть predict
+        self.word = None  # входное слово
 
-    def check_word(self, w):
-        self.w = w
-        if w == 'EPS':
-            w = ''
-        n = len(w)
-        self.d = [dict() for i in range(n + 1)]
-        self.add_sit(0, self.get_sit(self.gr.start, [], [self.gr.old_start], 0))
+    def check_word(self, word):
+        self.word = word
+        if word == 'EPS':
+            word = ''
+        n = len(word)
+        self.sets_of_situations = [dict() for i in range(n + 1)]
+        self.add_sit(0, self.get_sit(self.grammar.start, [], [self.grammar.old_start], 0))
 
         for j in range(n + 1):
             self.scan(j)
-            self.non_terms_to_predict = set(self.d[j].keys())
+            self.non_terms_to_predict = set(self.sets_of_situations[j].keys())
             if_change = True
             while if_change:
                 if_change = False
                 if_change |= self.complete(j)
                 if_change |= self.predict(j)
 
-        sit = self.get_sit(self.gr.start, [self.gr.old_start], [], 0)
-        if '$' not in self.d[n]:
+        situation = self.get_sit(self.grammar.start, [self.grammar.old_start], [], 0)
+        if '$' not in self.sets_of_situations[n]:
             return False
-        return sit in self.d[n]['$']
+        return situation in self.sets_of_situations[n]['$']
 
     def get_sit(self, left, before_dot, after_dot, i):
         """ Строит ситуацию, представив слова в правой части в виде связных списков """
@@ -87,49 +87,49 @@ class Earley:
 
         return Situation(left, ln_before_dot, ln_after_dot, i)
 
-    def transform_sit(self, sit):
+    def transform_sit(self, situation):
         """ По ситуации (S -> a·Bc, i) возвращает (S -> aB·c, i)"""
 
-        nl_after_dot = sit.after_dot.right
-        nl_before_dot = LetterNode(sit.after_dot.char)
-        nl_before_dot.left = sit.before_dot
-        return Situation(sit.left, nl_before_dot, nl_after_dot, sit.i)
+        nl_after_dot = situation.after_dot.right
+        nl_before_dot = LetterNode(situation.after_dot.char)
+        nl_before_dot.left = situation.before_dot
+        return Situation(situation.left, nl_before_dot, nl_after_dot, situation.i)
 
-    def add_sit(self, j, sit):
-        if sit.after_dot.char not in self.d[j]:
-            self.d[j][sit.after_dot.char] = set()
-        self.d[j][sit.after_dot.char].add(sit)
+    def add_sit(self, j, situation):
+        if situation.after_dot.char not in self.sets_of_situations[j]:
+            self.sets_of_situations[j][situation.after_dot.char] = set()
+        self.sets_of_situations[j][situation.after_dot.char].add(situation)
 
     def scan(self, j):
         if j == 0:
             return
-        if self.w[j - 1] not in self.d[j - 1]:
+        if self.word[j - 1] not in self.sets_of_situations[j - 1]:
             return
-        for sit in self.d[j - 1][self.w[j - 1]]:
-            self.add_sit(j, self.transform_sit(sit))
+        for situation in self.sets_of_situations[j - 1][self.word[j - 1]]:
+            self.add_sit(j, self.transform_sit(situation))
 
     def predict(self, j):
-        d_cp = {B: self.d[j][B].copy() for B in self.d[j].keys()}
+        sets_of_situations_copy = {B: self.sets_of_situations[j][B].copy() for B in self.sets_of_situations[j].keys()}
         for B in self.non_terms_to_predict:
-            if B == '$' or not self.gr.is_non_term(B) or B not in self.gr.rules:
+            if B == '$' or not self.grammar.is_non_term(B) or B not in self.grammar.rules:
                 continue
-            for right in self.gr.rules[B]:
+            for right in self.grammar.rules[B]:
                 if right[0] != 'EPS':
                     self.add_sit(j, self.get_sit(B, [], right, j))
                 else:
                     self.add_sit(j, self.get_sit(B, [], [], j))
-        self.non_terms_to_predict = self.d[j].keys() - d_cp.keys()
-        return d_cp != self.d[j]
+        self.non_terms_to_predict = self.sets_of_situations[j].keys() - sets_of_situations_copy.keys()
+        return sets_of_situations_copy != self.sets_of_situations[j]
 
     def complete(self, j):
-        if '$' not in self.d[j]:
+        if '$' not in self.sets_of_situations[j]:
             return False
-        d_cp = {B: self.d[j][B].copy() for B in self.d[j]}
-        for sit1 in d_cp['$']:
-            B = sit1.left
-            if B not in self.d[sit1.i]:
+        sets_of_situations_copy = {B: self.sets_of_situations[j][B].copy() for B in self.sets_of_situations[j]}
+        for situation_1 in sets_of_situations_copy['$']:
+            B = situation_1.left
+            if B not in self.sets_of_situations[situation_1.i]:
                 continue
-            for sit2 in self.d[sit1.i][B].copy():
-                self.add_sit(j, self.transform_sit(sit2))
-        self.non_terms_to_predict |= self.d[j].keys() - d_cp.keys()
-        return d_cp != self.d[j]
+            for situation_2 in self.sets_of_situations[situation_1.i][B].copy():
+                self.add_sit(j, self.transform_sit(situation_2))
+        self.non_terms_to_predict |= self.sets_of_situations[j].keys() - sets_of_situations_copy.keys()
+        return sets_of_situations_copy != self.sets_of_situations[j]
