@@ -1,0 +1,8 @@
+S -> aT
+S -> aSa
+T -> bU
+T -> cT
+U -> Va
+U -> cU
+V -> baVc
+V -> a

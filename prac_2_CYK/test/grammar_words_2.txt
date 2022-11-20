@@ -1,0 +1,6 @@
+cacb 1
+cacacbb 1
+cacbacacbb 1
+cacbacacbba 0
+EPS 0
+r 0
