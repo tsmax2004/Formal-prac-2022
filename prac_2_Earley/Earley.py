@@ -55,7 +55,7 @@ class Earley:
 
         self.non_terms_predicted = set()  # нетерминалы, которые раскрыты в predict
         self.non_terms_to_predict = set()  # нетерминалы, которые должен раскрыть predict
-        self.tmp_non_terms_to_predict = set()  # новые нетерминалы, которые добавяться в non_terms_to_predict
+        self.tmp_non_terms_to_predict = set()  # новые нетерминалы, которые добавятся в non_terms_to_predict
 
         self.word = None  # входное слово
 
@@ -65,7 +65,7 @@ class Earley:
             word = ''
         n = len(word)
         self.sets_of_situations = [dict() for i in range(n + 1)]
-        self.add_sit(0, self.get_sit(self.grammar.start, [], [self.grammar.old_start], 0))
+        self.add_situation(0, self.get_situation(self.grammar.start, [], [self.grammar.old_start], 0))
 
         for j in range(n + 1):
             self.scan(j)
@@ -81,10 +81,10 @@ class Earley:
 
         if '$' not in self.sets_of_situations[n]:
             return False
-        situation = self.get_sit(self.grammar.start, [self.grammar.old_start], [], 0)
+        situation = self.get_situation(self.grammar.start, [self.grammar.old_start], [], 0)
         return situation in self.sets_of_situations[n]['$']
 
-    def get_sit(self, left, before_dot, after_dot, i):
+    def get_situation(self, left, before_dot, after_dot, i):
         """ Строит ситуацию, представив слова в правой части в виде связных списков """
 
         ln = LetterNode('$')
@@ -103,7 +103,7 @@ class Earley:
 
         return Situation(left, ln_before_dot, ln_after_dot, i)
 
-    def transform_sit(self, situation):
+    def transform_situation(self, situation):
         """ По ситуации (S -> a·Bc, i) возвращает (S -> aB·c, i)"""
 
         nl_after_dot = situation.after_dot.right
@@ -111,7 +111,7 @@ class Earley:
         nl_before_dot.left = situation.before_dot
         return Situation(situation.left, nl_before_dot, nl_after_dot, situation.i)
 
-    def add_sit(self, j, situation):
+    def add_situation(self, j, situation):
         if situation.after_dot.char != '$' and self.grammar.is_non_term(situation.after_dot.char):
             if situation.after_dot.char not in self.non_terms_predicted and \
                     situation.after_dot.char not in self.non_terms_to_predict:
@@ -130,7 +130,7 @@ class Earley:
         if self.word[j - 1] not in self.sets_of_situations[j - 1]:
             return
         for situation in self.sets_of_situations[j - 1][self.word[j - 1]]:
-            self.add_sit(j, self.transform_sit(situation))
+            self.add_situation(j, self.transform_situation(situation))
 
     def predict(self, j):
         if_change = False
@@ -140,9 +140,9 @@ class Earley:
                 continue
             for right in self.grammar.rules[B]:
                 if right[0] != 'EPS':
-                    if_change |= self.add_sit(j, self.get_sit(B, [], right, j))
+                    if_change |= self.add_situation(j, self.get_situation(B, [], right, j))
                 else:
-                    if_change |= self.add_sit(j, self.get_sit(B, [], [], j))
+                    if_change |= self.add_situation(j, self.get_situation(B, [], [], j))
         self.non_terms_to_predict = self.tmp_non_terms_to_predict.copy()
         self.tmp_non_terms_to_predict.clear()
         return if_change
@@ -156,7 +156,7 @@ class Earley:
             if B not in self.sets_of_situations[situation_1.i]:
                 continue
             for situation_2 in self.sets_of_situations[situation_1.i][B].copy():
-                if_change |= self.add_sit(j, self.transform_sit(situation_2))
+                if_change |= self.add_situation(j, self.transform_situation(situation_2))
         self.non_terms_to_predict |= self.tmp_non_terms_to_predict
         self.tmp_non_terms_to_predict.clear()
         return if_change
