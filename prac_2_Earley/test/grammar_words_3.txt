@@ -1,0 +1,5 @@
+aaaaaaaaaaaaaaaaaaaaaa 1
+aaaaaaa 0
+a 0
+EPS 0
+aaaaaaaa 1
